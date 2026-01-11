@@ -12,6 +12,8 @@ async function bootstrap() {
     .setDescription("API documentation for MealMate backend")
     .setVersion("1.0")
     .addBearerAuth()
+    .addServer("/mealmate")
+    .addServer("/")
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("api/docs", app, document);
