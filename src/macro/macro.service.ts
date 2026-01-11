@@ -12,13 +12,9 @@ export class MacroService {
   ) {}
 
   calculateMacros(profile: Partial<UserProfile> | SubmitOnboardingDto) {
-    // 1. Extract values, handling both DTO and Entity structures
-    // Because mapped names in DTO might not be direct in raw object if not transformed,
-    // we assume the caller passes a standard object that looks like the Entity or mapped DTO.
-    // Ideally, we normalize input. For this simplicity, we rely on the DTO->Entity mapping logic.
+    // 1. Extract values
     const p = profile as any;
 
-    // Normalize properties
     const weight = p.weight || p.weight_kg;
     const height = p.height || p.height_cm;
     const age = p.age;
@@ -27,7 +23,6 @@ export class MacroService {
     const goalRaw = p.goal;
 
     if (!weight || !height || !age || !gender) {
-      // Return zeros if basic data is missing
       return null;
     }
 
@@ -39,59 +34,78 @@ export class MacroService {
       bmr = 10 * weight + 6.25 * height - 5 * age - 161;
     }
 
-    // 2. TDEE Multiplier
+    // 2. TDEE Multiplier (Antigravity v1 Map)
+    // very_low: 1.2, low: 1.375, medium: 1.55, high: 1.725
     let activityMultiplier = 1.2;
-    const activityLevel = activityLevelRaw?.toLowerCase() || "sedentary";
+    const activityLevel = activityLevelRaw?.toLowerCase() || "very_low";
 
-    if (activityLevel.includes("sedentary") || activityLevel.includes("kantor"))
+    if (
+      activityLevel.includes("very_low") ||
+      activityLevel.includes("sedentary")
+    )
       activityMultiplier = 1.2;
-    else if (activityLevel.includes("light") || activityLevel.includes("low"))
+    else if (activityLevel.includes("low") || activityLevel.includes("light"))
       activityMultiplier = 1.375;
     else if (
-      activityLevel.includes("moderate") ||
-      activityLevel.includes("medium")
+      activityLevel.includes("medium") ||
+      activityLevel.includes("moderate")
     )
       activityMultiplier = 1.55;
-    else if (activityLevel.includes("active") || activityLevel.includes("high"))
+    else if (activityLevel.includes("high") || activityLevel.includes("active"))
       activityMultiplier = 1.725;
 
     const tdee = bmr * activityMultiplier;
 
     // 3. Goal Adjustment
-    let targetCalories = tdee;
+    // bulking: +350, cutting: -500, maintain: 0
+    let goalOffset = 0;
     let goalLabel = "Maintain Weight";
-    let surplus = 0;
     const goal = goalRaw?.toLowerCase() || "maintain";
 
-    if (
-      goal.includes("lose") ||
-      goal.includes("turun") ||
-      goal.includes("cut")
-    ) {
-      surplus = -500;
-      targetCalories = tdee - 500;
-      goalLabel = "Defisit -500 kkal";
-    } else if (
-      goal.includes("gain") ||
-      goal.includes("naik") ||
-      goal.includes("bulk")
-    ) {
-      surplus = 350;
-      targetCalories = tdee + 350;
+    if (goal.includes("bulking") || goal.includes("gain")) {
+      goalOffset = 350;
       goalLabel = "Surplus +350 kkal";
+    } else if (goal.includes("cutting") || goal.includes("lose")) {
+      goalOffset = -500;
+      goalLabel = "Defisit -500 kkal";
     }
 
-    // Round calories to nearest 10
-    targetCalories = Math.round(targetCalories / 10) * 10;
+    // 5. Target Calories
+    let targetCal = tdee + goalOffset;
 
-    // 4. Macro Splits (Standard Balanced Diet: 25% P, 50% C, 25% F)
-    const proteinCals = targetCalories * 0.25;
-    const carbCals = targetCalories * 0.5;
-    const fatCals = targetCalories * 0.25;
+    // 6. Safety Clamp
+    // min 1200
+    if (targetCal < 1200) targetCal = 1200;
+    // max deficit constraint: targetCal >= tdee - 800
+    if (targetCal < tdee - 800) targetCal = tdee - 800;
 
-    const proteinGrams = Math.round(proteinCals / 4);
-    const carbGrams = Math.round(carbCals / 4);
-    const fatGrams = Math.round(fatCals / 9);
+    // Round to nearest 10
+    targetCal = Math.round(targetCal / 10) * 10;
+
+    // 7. Macro Split Preset v1 = 25/50/25
+    const proteinKcal = targetCal * 0.25;
+    const carbsKcal = targetCal * 0.5;
+    const fatKcal = targetCal * 0.25;
+
+    let proteinG = proteinKcal / 4;
+    const carbsG = carbsKcal / 4;
+    const fatG = fatKcal / 9;
+
+    // Optional: Enforce minimum protein (1.6 * weight)
+    if (goal.includes("bulking") || goal.includes("cutting")) {
+      const minProtein = 1.6 * weight;
+      if (proteinG < minProtein) {
+        proteinG = minProtein;
+        // Recalculate calories ? - Requirement only says "protein_g = max(...)"
+        // Usually we would adjust others, but spec implies just overriding Grams.
+        // We will stick to the grammar of the spec.
+      }
+    }
+
+    // Round macros
+    const proteinGrams = Math.round(proteinG);
+    const carbGrams = Math.round(carbsG);
+    const fatGrams = Math.round(fatG);
 
     // 5. Tips based on profile
     let tipTitle = "Tips Umum";
@@ -105,14 +119,30 @@ export class MacroService {
     }
 
     return {
-      targetCalories,
+      // Inputs for verification
+      bmr,
+      activityMultiplier,
+      tdee,
+      goalOffset,
+
+      // Results
+      targetCalories: targetCal, // Keeping API compat
       goalLabel,
-      surplusOrDeficit: surplus > 0 ? `+${surplus}` : `${surplus}`,
+      surplusOrDeficit: goalOffset > 0 ? `+${goalOffset}` : `${goalOffset}`,
       macros: {
         protein: { grams: proteinGrams, percentage: 25 },
         carbs: { grams: carbGrams, percentage: 50 },
         fats: { grams: fatGrams, percentage: 25 },
       },
+
+      // Structure specific for Antigravity Engine
+      dayTargets: {
+        cal: targetCal,
+        protein_g: proteinGrams,
+        carbs_g: carbGrams,
+        fat_g: fatGrams,
+      },
+
       estimation: {
         weeks: 12,
         message: "Mencapai target dalam 12 Minggu",
