@@ -11,20 +11,23 @@ import {
 } from "class-validator";
 
 class PreferencesDto {
-  @ApiProperty({ example: ["Ayam", "Sapi", "Ikan", "Telur"] })
+  @ApiProperty({
+    name: "protein_sources",
+    example: ["Ayam", "Sapi", "Ikan", "Telur"],
+  })
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
   @Expose({ name: "protein_sources" })
   proteinSources?: string[];
 
-  @ApiProperty({ example: "medium" })
+  @ApiProperty({ name: "budget_tier", example: "medium" })
   @IsString()
   @IsOptional()
   @Expose({ name: "budget_tier" })
   budgetTier?: string;
 
-  @ApiProperty({ example: ["high_protein", "low_calorie"] })
+  @ApiProperty({ name: "diet_tags", example: ["high_protein", "low_calorie"] })
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
