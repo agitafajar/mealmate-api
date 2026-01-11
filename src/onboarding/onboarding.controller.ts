@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Post,
+  Query,
   UsePipes,
   ValidationPipe,
 } from "@nestjs/common";
@@ -14,8 +15,8 @@ export class OnboardingController {
   constructor(private onboarding: OnboardingService) {}
 
   @Get("steps")
-  getSteps() {
-    return this.onboarding.getSteps();
+  getSteps(@Query("goal") goal?: string) {
+    return this.onboarding.getSteps(goal);
   }
 
   @Post("profile")

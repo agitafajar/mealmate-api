@@ -4,6 +4,7 @@ import { AuthModule } from "./auth/auth.module";
 import { OnboardingModule } from "./onboarding/onboarding.module";
 import { PlanModule } from "./plan/plan.module";
 import { DashboardModule } from "./dashboard/dashboard.module";
+import { MacroModule } from "./macro/macro.module";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 
@@ -14,6 +15,7 @@ import { AppService } from "./app.service";
     OnboardingModule,
     PlanModule,
     DashboardModule,
+    MacroModule,
   ],
   controllers: [AppController],
   providers: [AppService],
