@@ -8,7 +8,7 @@ import {
   ValidationPipe,
 } from "@nestjs/common";
 import { OnboardingService } from "./onboarding.service";
-import { SubmitOnboardingDto } from "./dto/submit-onboarding.dto";
+import { OnboardingProfileDto } from "./dto/submit-onboarding.dto";
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from "@nestjs/swagger";
 
 @ApiTags("Onboarding")
@@ -28,12 +28,12 @@ export class OnboardingController {
     return this.onboarding.getSteps(goal);
   }
 
-  @Post("profile")
+  @Post("/onboarding/profile")
   @ApiOperation({ summary: "Submit or update user profile" })
   @ApiResponse({ status: 201, description: "Profile saved successfully" })
   @UsePipes(new ValidationPipe({ whitelist: true }))
-  submitProfile(@Body() body: SubmitOnboardingDto) {
+  submit(@Body() dto: OnboardingProfileDto) {
     const userId = "temp-user-id";
-    return this.onboarding.submitProfile(userId, body);
+    return this.onboarding.submitProfile(userId, dto);
   }
 }

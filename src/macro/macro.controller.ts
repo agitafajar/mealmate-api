@@ -8,7 +8,7 @@ import {
 } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 import { MacroService } from "./macro.service";
-import { SubmitOnboardingDto } from "../onboarding/dto/submit-onboarding.dto";
+import { OnboardingProfileDto } from "../onboarding/dto/submit-onboarding.dto";
 
 @ApiTags("Macro")
 @Controller("macro")
@@ -19,7 +19,7 @@ export class MacroController {
   @ApiOperation({ summary: "Preview macro calculation without saving" })
   @ApiResponse({ status: 201, description: "Macro calculation result" })
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
-  preview(@Body() body: SubmitOnboardingDto) {
+  preview(@Body() body: OnboardingProfileDto) {
     // For preview, we directly calculate based on the body provided
     return this.macroService.calculateMacros(body);
   }
@@ -37,7 +37,7 @@ export class MacroController {
   @ApiOperation({ summary: "Calculate macro result based on payload" })
   @ApiResponse({ status: 201, description: "Macro calculation result" })
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
-  postResult(@Body() body: SubmitOnboardingDto) {
+  postResult(@Body() body: OnboardingProfileDto) {
     return this.macroService.calculateMacros(body);
   }
 }

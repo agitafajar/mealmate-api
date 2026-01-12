@@ -3,7 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { OnboardingStepEntity } from "../entities/onboarding-step.entity";
 import { UserProfile } from "../entities/user-profile.entity";
-import { SubmitOnboardingDto } from "./dto/submit-onboarding.dto";
+import { OnboardingProfileDto } from "./dto/submit-onboarding.dto";
 
 import { MacroService } from "../macro/macro.service";
 
@@ -54,7 +54,7 @@ export class OnboardingService {
     });
   }
 
-  async submitProfile(userId: string, data: SubmitOnboardingDto) {
+  async submitProfile(userId: string, data: OnboardingProfileDto) {
     let profile = await this.profileRepo.findOne({
       where: { userId },
     });

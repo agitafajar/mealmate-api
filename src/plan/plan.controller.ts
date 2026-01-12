@@ -6,7 +6,7 @@ import {
   ValidationPipe,
 } from "@nestjs/common";
 import { PlanService, FoodItem } from "./plan.service";
-import { SubmitOnboardingDto } from "../onboarding/dto/submit-onboarding.dto";
+import { OnboardingProfileDto } from "../onboarding/dto/submit-onboarding.dto";
 import {
   ApiProperty,
   ApiTags,
@@ -41,7 +41,7 @@ class FoodItemDto {
   allergen?: string[];
 }
 
-class GeneratePlanDto extends SubmitOnboardingDto {
+class GeneratePlanDto extends OnboardingProfileDto {
   @ApiProperty({ type: [FoodItemDto] })
   @IsArray()
   @ValidateNested({ each: true })

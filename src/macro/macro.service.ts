@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { UserProfile } from "../entities/user-profile.entity";
-import { SubmitOnboardingDto } from "../onboarding/dto/submit-onboarding.dto";
+import { OnboardingProfileDto } from "../onboarding/dto/submit-onboarding.dto";
 
 @Injectable()
 export class MacroService {
@@ -11,7 +11,7 @@ export class MacroService {
     private profileRepo: Repository<UserProfile>
   ) {}
 
-  calculateMacros(profile: Partial<UserProfile> | SubmitOnboardingDto) {
+  calculateMacros(profile: Partial<UserProfile> | OnboardingProfileDto) {
     // 1. Extract values
     const p = profile as any;
 

@@ -35,7 +35,7 @@ class PreferencesDto {
   dietTags?: string[];
 }
 
-export class SubmitOnboardingDto {
+export class OnboardingProfileDto {
   @ApiProperty({ example: "male" })
   @IsString()
   @IsOptional()
