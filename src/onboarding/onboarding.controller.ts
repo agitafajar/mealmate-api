@@ -28,7 +28,7 @@ export class OnboardingController {
     return this.onboarding.getSteps(goal);
   }
 
-  @Post("/onboarding/profile")
+  @Post("profile")
   @ApiOperation({ summary: "Submit or update user profile" })
   @ApiResponse({ status: 201, description: "Profile saved successfully" })
   @UsePipes(new ValidationPipe({ whitelist: true }))
