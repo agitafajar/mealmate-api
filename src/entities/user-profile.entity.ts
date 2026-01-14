@@ -21,10 +21,10 @@ export class UserProfile {
   @Column({ nullable: true })
   age: number;
 
-  @Column({ type: "float", nullable: true })
+  @Column({ name: "height_cm", type: "float", nullable: true })
   height: number;
 
-  @Column({ type: "float", nullable: true })
+  @Column({ name: "weight_kg", type: "float", nullable: true })
   weight: number;
 
   @Column({ name: "activity_level", nullable: true })
