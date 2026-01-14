@@ -4,12 +4,21 @@ import {
   Get,
   Post,
   Query,
+  Req,
+  UseGuards,
   UsePipes,
   ValidationPipe,
 } from "@nestjs/common";
 import { OnboardingService } from "./onboarding.service";
 import { OnboardingProfileDto } from "./dto/submit-onboarding.dto";
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from "@nestjs/swagger";
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiQuery,
+  ApiBearerAuth,
+} from "@nestjs/swagger";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 
 @ApiTags("Onboarding")
 @Controller("onboarding")
@@ -29,11 +38,15 @@ export class OnboardingController {
   }
 
   @Post("profile")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: "Submit or update user profile" })
   @ApiResponse({ status: 201, description: "Profile saved successfully" })
+  @ApiResponse({ status: 400, description: "Validation failed" })
+  @ApiResponse({ status: 401, description: "Unauthorized" })
   @UsePipes(new ValidationPipe({ whitelist: true }))
-  submit(@Body() dto: OnboardingProfileDto) {
-    const userId = "temp-user-id";
+  submit(@Body() dto: OnboardingProfileDto, @Req() req) {
+    const userId = req.user.userId;
     return this.onboarding.submitProfile(userId, dto);
   }
 }

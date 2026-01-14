@@ -13,6 +13,7 @@ export class AuthController {
   @ApiOperation({ summary: "Register a new user" })
   @ApiResponse({ status: 201, description: "User successfully registered" })
   @ApiResponse({ status: 400, description: "Bad Request" })
+  @ApiResponse({ status: 401, description: "Email already registered" })
   register(@Body() dto: RegisterDto) {
     return this.auth.register(dto.email, dto.password, dto.fullName);
   }

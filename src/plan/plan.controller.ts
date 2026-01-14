@@ -57,6 +57,10 @@ export class PlanController {
   @Post("generate")
   @ApiOperation({ summary: "Generate a meal plan engine v1" })
   @ApiResponse({ status: 201, description: "Generated meal plan" })
+  @ApiResponse({
+    status: 400,
+    description: "Invalid profile for macro calculation",
+  })
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   generate(@Body() body: GeneratePlanDto) {
     // Separate catalog from profile
