@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, BadRequestException } from "@nestjs/common";
 import { OnboardingProfileDto } from "../onboarding/dto/submit-onboarding.dto";
 import { MacroService } from "../macro/macro.service";
 
@@ -30,7 +30,8 @@ export class PlanService {
   generatePlan(profile: OnboardingProfileDto, catalog: FoodItem[]) {
     // 1. Get Macro Engine Result
     const macroResult = this.macroService.calculateMacros(profile);
-    if (!macroResult) throw new Error("Invalid profile for macro calculation");
+    if (!macroResult)
+      throw new BadRequestException("Invalid profile for macro calculation");
 
     const dayTargets = macroResult.dayTargets;
     const inputEcho = profile;
